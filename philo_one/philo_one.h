@@ -9,11 +9,11 @@
 # define ERR_ARGC 		"Error: arguments is bad\n"
 # define ERR_PTHREAD	"Error: pthread\n"
 
-typedef struct 			s_philo
-{
-	int 				name;
-	pthread_mutex_t		*left;
-	pthread_mutex_t		*right;
-}						t_philo;
+//typedef struct 			s_philo
+//{
+//	int 				name;
+//	pthread_mutex_t		*left;
+//	pthread_mutex_t		*right;
+//}						t_philo;
 
 #endif
