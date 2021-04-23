@@ -1,21 +1,21 @@
 #ifndef PHILO_ONE_H
 # define PHILO_ONE_H
 
-#define TAKEN_FORK			"has taken a"
-#define PUT_FORK			"put down a"
-#define LEFT_FORK			"left fork"
-#define RIGHT_FORK			"right fork"
-#define PHILO_EAT			"is eating"
-#define PHILO_SLEEP			"is sleeping"
-#define PHILP_THINK			"is thinking"
-#define PHILO_DIED			"died"
-#define COUNT_PARAMS		"Count params is incorrect\n"
-#define CORRECT_PARAMS		"Input params is incorrect\n"
+# define TAKEN_FORK			"has taken a"
+# define PUT_FORK			"put down a"
+# define LEFT_FORK			"left fork"
+# define RIGHT_FORK			"right fork"
+# define PHILO_EAT			"is eating"
+# define PHILO_SLEEP			"is sleeping"
+# define PHILO_THINK			"is thinking"
+# define PHILO_DIED			"died"
+# define COUNT_PARAMS		"Count params is incorrect\n"
+# define CORRECT_PARAMS		"Input params is incorrect\n"
 
-#define FALSE				0
-#define TRUE				1
+# define FALSE				0
+# define TRUE				1
 
-#include <pthread.h>		/*
+# include <pthread.h>		/*
 							** pthread_create
 							** pthread_detach
 							** pthread_join
@@ -24,22 +24,22 @@
 							** pthread_mutex_lock
 							** pthread_mutex_unlock
 							*/
-#include <unistd.h>			/*
+# include <unistd.h>			/*
 							** write
 							** usleep
 							*/
-#include <stdio.h>			/*
+# include <stdio.h>			/*
 							** printf
 							*/
-#include <string.h>			/*
+# include <string.h>			/*
 							** memset
 							*/
-#include <stdlib.h>			/*
+# include <stdlib.h>			/*
 							** malloc
 							** free
 
 							*/
-#include <sys/time.h>		/*
+# include <sys/time.h>		/*
 							** gettimeofday
 							*/
 
