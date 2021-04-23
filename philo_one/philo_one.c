@@ -10,15 +10,16 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#define PHILO_TAKEN_FORK	"has taken a "					/* 12 */
-#define TAKEN_LEFT_FORK		"left fork\n"					/* 10 */
-#define TAKEN_RIGHT_FORK	"right fork\n"					/* 11 */
-#define PHILO_EAT			"is eating\n"					/* 10 */
-#define PHILO_SLEEP			"is sleeping\n"					/* 12 */
-#define PHILP_THINK			"is thinking\n"					/* 12 */
-#define PHILO_DIED			"died\n"						/* 5  */
-#define COUNT_PARAMS		"Count params is incorrect\n"	/* 26 */
-#define CORRECT_PARAMS		"Input params is incorrect\n"	/* 26 */
+#define PHILO_TAKEN_FORK	"has taken a"
+#define PHILO_PUT_FORK		"put down a"
+#define TAKEN_LEFT_FORK		"left fork"
+#define TAKEN_RIGHT_FORK	"right fork"
+#define PHILO_EAT			"is eating"
+#define PHILO_SLEEP			"is sleeping"
+#define PHILP_THINK			"is thinking"
+#define PHILO_DIED			"died"
+#define COUNT_PARAMS		"Count params is incorrect\n"
+#define CORRECT_PARAMS		"Input params is incorrect\n"
 
 #define FALSE				0
 #define TRUE				1
@@ -55,13 +56,17 @@
 typedef struct			s_philo
 {
 	pthread_t			philo;
-	pthread_mutex_t		left_fork;
-	pthread_mutex_t		right_fork;
+	pthread_mutex_t		*left_fork;
+	pthread_mutex_t		*right_fork;
 	int					num;
+	t_info				*info;
 }						t_philo;
 
 typedef struct			s_info
 {
+	pthread_mutex_t		*philo_eat;
+	pthread_mutex_t		*philo_sleep;
+	pthread_mutex_t		*philo_think;
 	int					numb;
 	int					die;
 	int					eat;
@@ -69,7 +74,6 @@ typedef struct			s_info
 	int					numb_must_eat;
 	int					must_eat;
 	double				time;
-	t_philo				**philo;
 }						t_info;
 
 int						ternar_int(int condition, int p1, int p2)
@@ -88,24 +92,29 @@ void					*routine(void *info)
 	while (i < (int)info->numb)
 	{
 		philo_eat(&(t_philo*)info->philo[i], (int)info->eat);
+
 		philo_sleep((&(t_philo*)info->philo[i], (int)info->sleep);
 		philo_think((&(t_philo*)info->philo[i], (int)info->think);
 		i++;
 	}
 }
 
-void					*philo_eat(void **philo, int time_to_eat)
+void					*philo_eat(t_philo *philo, pthread_mutex_t *philo_eat, int time_to_eat)
 {
 	int					i = 5;
 
-	pthread_mutex_lock(&(pthread_mutex_t*)philo->left_fork);
-	pthread_mutex_lock(&(pthread_mutex_t*)philo->right_fork);
-	write(1, PHILO_EAT, 9);
-	write (i < 5)
-		printf("%d\n ", arr[i++]);
-	usleep(3000000);
-	pthread_mutex_unlock(&(pthread_mutex_t*)philo->right_fork);
-	pthread_mutex_unlock(&(pthread_mutex_t*)philo->left_fork);
+	pthread_mutex_lock((pthread_mutex_t*)philo->left_fork);
+	printf("%d %d %s%s", time_to_eat, philo->num, PHILO_TAKEN_FORK, TAKEN_LEFT_FORK);
+	pthread_mutex_lock((pthread_mutex_t*)philo->right_fork);
+	printf("%d %d %s%s", time_to_eat, philo->num, PHILO_TAKEN_FORK, TAKEN_RIGHT_FORK);
+	pthread_mutex_lock(philo_eat);
+
+	printf("%d %d %s", time_to_eat, philo->num, PHILO_EAT);
+	usleep(time_to_eat * 1000);
+
+	pthread_mutex_unlock(philo_eat);
+	pthread_mutex_unlock((pthread_mutex_t*)philo->right_fork);
+	pthread_mutex_unlock((pthread_mutex_t*)philo->left_fork);
 	return (NULL);
 }
 
@@ -121,13 +130,15 @@ void					*philo_think(t_philo **philo, int time_to_think)
 
 t_info					*init_info(t_info *info, char **argv)
 {
+	info->philo_eat = NULL;
+	info->philo_sleep = NULL;
+	info->philo_think = NULL;
 	info->numb = ft_atoi(argv[1]);
 	info->die = ft_atoi(argv[2]);
 	info->eat = ft_atoi(argv[3]);
 	info->sleep = ft_atoi(argv[4]);
 	info->numb_must_eat = ternar_int((argv[5] && !info->must_eat), \
 	ft_atoi(argv[5]), 0);
-	info->time = 0;
 	if (info->numb < 0 || info->die < 0 || info->eat < 0
 	|| info->sleep < 0 || info->numb_must_eat < 0)
 	{
@@ -177,23 +188,25 @@ int						main(int argc, char **argv)
 {
 	int					i;
 	t_info				info;
+	t_philo				**philo;
 	int					num;
 
 	if (argc == 4 || argc == 5)
 	{
+//		info.time =
 		info.must_eat = ternar_int((argc == 5), 0, -1);
 		if (!init_info(&info))
 			continue ;
-		init.philo = malloc(sizeof(t_philo*) * init.numb);
-		if (!init.philo)
+		philo = malloc(sizeof(t_philo*) * init.numb);
+		if (!philo)
 			continue ;
+		init_philo(&philo, &init);
 		while (TRUE)
 		{
 			i = 0;
-			init_philo(&philo);
 			while (i < init.numb_of_philo)
 			{
-				pthread_create(&thread1, NULL, &philo_eat, &(void*)philo[i]);
+				pthread_create(&philo[i]->philo, NULL, &routine, &(void*)philo);
 
 				destroy_philo(&philo);
 				if (init.must_eat == init.numb_philo_must_eat)
@@ -203,6 +216,7 @@ int						main(int argc, char **argv)
 			}
 			/* usleep(3000000); */
 		}
+		free(philo);
 		destroy_init(&init);
 	}
 	else
