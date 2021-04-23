@@ -10,169 +10,167 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#define PHILO_TAKEN_FORK	"has taken a"
-#define PHILO_PUT_FORK		"put down a"
-#define TAKEN_LEFT_FORK		"left fork"
-#define TAKEN_RIGHT_FORK	"right fork"
-#define PHILO_EAT			"is eating"
-#define PHILO_SLEEP			"is sleeping"
-#define PHILP_THINK			"is thinking"
-#define PHILO_DIED			"died"
-#define COUNT_PARAMS		"Count params is incorrect\n"
-#define CORRECT_PARAMS		"Input params is incorrect\n"
+#include "philo_one.h"
 
-#define FALSE				0
-#define TRUE				1
-
-#include <pthread.h>		/*
-							** pthread_create
-							** pthread_detach
-							** pthread_join
-							** pthread_mutex_init
-							** pthread_mutex_destroy
-							** pthread_mutex_lock
-							** pthread_mutex_unlock 
-							*/
-#include <unistd.h>			/*
-							** write
-							** usleep
-							*/
-#include <stdio.h>			/*
-							** printf
-							*/
-#include <string.h>			/*
-							** memset
-							*/
-#include <stdlib.h>			/*
-							** malloc
-							** free
-
-							*/
-#include <sys/time.h>		/*
-							** gettimeofday
-							*/
-
-
-typedef struct			s_philo
+int						gettime_print(t_philo *philo, char *p1, char *p2)
 {
-	pthread_t			philo;
-	pthread_mutex_t		*left_fork;
-	pthread_mutex_t		*right_fork;
-	int					num;
-	t_info				*info;
-}						t_philo;
-
-typedef struct			s_info
-{
-	pthread_mutex_t		*philo_eat;
-	pthread_mutex_t		*philo_sleep;
-	pthread_mutex_t		*philo_think;
-	int					numb;
-	int					die;
-	int					eat;
-	int					sleep;
-	int					numb_must_eat;
-	int					must_eat;
-	double				time;
-}						t_info;
-
-int						ternar_int(int condition, int p1, int p2)
-{
-	if (condition)
-		return p1;
-	else
-		return p2;
+	if (gettimeofday(&philo->info->real_time, NULL) == -1)
+		return (0);
+	if (philo->info->start_time.tv_sec == 0 && philo->info->start_time.tv_usec == 0)
+	{
+		philo->info->start_time.tv_sec = philo->info->real_time.tv_sec;
+		philo->info->start_time.tv_usec = philo->info->real_time.tv_usec;
+	}
+	printf("%ld %d %s", (philo->info->real_time.tv_sec - philo->info->start_time.tv_sec) * 1000
+	+ (philo->info->real_time.tv_usec - philo->info->start_time.tv_usec) / 1000, philo->num, p1);
+	if (p2)
+		printf(" %s", p2);
+	printf("\n");
+	return (1);
 }
 
-void					*routine(void *info)
+int						philo_eat(t_philo *philo, int left_fork, int right_fork)
+{
+	pthread_mutex_lock(&philo->info->forks[left_fork]);
+	gettime_print(philo, TAKEN_FORK, LEFT_FORK);
+
+	pthread_mutex_lock(&philo->info->forks[right_fork]);
+	gettime_print(philo, TAKEN_FORK, RIGHT_FORK);
+
+	pthread_mutex_lock(&philo->info->block_eat);
+
+	gettime_print(philo, PHILO_EAT, NULL);
+	myusleep(philo->info->eat * 1000);
+	philo->life_cycle += philo->info->eat;
+	if (philo->life_cycle >= philo->info->die)
+		return (0);
+
+	pthread_mutex_unlock(&philo->info->block_eat);
+
+	pthread_mutex_unlock(&philo->info->forks[right_fork]);
+	gettime_print(philo, PUT_FORK, RIGHT_FORK);
+
+	pthread_mutex_unlock(&philo->info->forks[left_fork]);
+	gettime_print(philo, PUT_FORK, LEFT_FORK);
+	return (1);
+}
+
+int						philo_sleep(t_philo *philo)
+{
+	return (1);
+}
+
+int						philo_think(t_philo *philo)
+{
+	return (1);
+}
+
+void					*routine(void *philo)
+{
+	int					i;
+	int 				status;
+
+	i = 0;
+	while (i < ((t_philo*)philo)->info->numb)
+	{
+		status = philo_eat(&((t_philo*)philo)[i], ((t_philo*)philo)[i].left_fork, ((t_philo*)philo)[i].right_fork);
+		if (!status || ((t_philo*)philo)[i].life_cycle >= ((t_philo*)philo)[i].info->die)
+			return (NULL);
+		status = philo_sleep(&((t_philo*)philo)[i]);
+
+		status = philo_think(&((t_philo*)philo)[i]);
+		i += 2;
+	}
+	return (NULL);
+}
+
+void 					init_forks(pthread_mutex_t *forks, int numb)
 {
 	int					i;
 
 	i = 0;
-	while (i < (int)info->numb)
-	{
-		philo_eat(&(t_philo*)info->philo[i], (int)info->eat);
-
-		philo_sleep((&(t_philo*)info->philo[i], (int)info->sleep);
-		philo_think((&(t_philo*)info->philo[i], (int)info->think);
-		i++;
-	}
+	while (i < numb)
+		pthread_mutex_init(&forks[i++], NULL);
 }
-
-void					*philo_eat(t_philo *philo, pthread_mutex_t *philo_eat, int time_to_eat)
-{
-	int					i = 5;
-
-	pthread_mutex_lock((pthread_mutex_t*)philo->left_fork);
-	printf("%d %d %s%s", time_to_eat, philo->num, PHILO_TAKEN_FORK, TAKEN_LEFT_FORK);
-	pthread_mutex_lock((pthread_mutex_t*)philo->right_fork);
-	printf("%d %d %s%s", time_to_eat, philo->num, PHILO_TAKEN_FORK, TAKEN_RIGHT_FORK);
-	pthread_mutex_lock(philo_eat);
-
-	printf("%d %d %s", time_to_eat, philo->num, PHILO_EAT);
-	usleep(time_to_eat * 1000);
-
-	pthread_mutex_unlock(philo_eat);
-	pthread_mutex_unlock((pthread_mutex_t*)philo->right_fork);
-	pthread_mutex_unlock((pthread_mutex_t*)philo->left_fork);
-	return (NULL);
-}
-
-void					*philo_sleep(t_philo **philo, int time_to_sleep)
-{
-}
-
-void					*philo_think(t_philo **philo, int time_to_think)
-{
-
-}
-
 
 t_info					*init_info(t_info *info, char **argv)
 {
-	info->philo_eat = NULL;
-	info->philo_sleep = NULL;
-	info->philo_think = NULL;
 	info->numb = ft_atoi(argv[1]);
 	info->die = ft_atoi(argv[2]);
 	info->eat = ft_atoi(argv[3]);
 	info->sleep = ft_atoi(argv[4]);
 	info->numb_must_eat = ternar_int((argv[5] && !info->must_eat), \
 	ft_atoi(argv[5]), 0);
+
 	if (info->numb < 0 || info->die < 0 || info->eat < 0
 	|| info->sleep < 0 || info->numb_must_eat < 0)
 	{
 		write(2, CORRECT_PARAMS, 26);
 		return (NULL);
 	}
+	info->start_time.tv_sec = 0;
+	info->start_time.tv_usec = 0;
+	info->forks = malloc(sizeof(pthread_mutex_t) * info->numb);
+	if (!info->forks)
+		return (NULL);
+	init_forks(info->forks);
 	return (info);
 
 }
 
-void					init_philo(t_philo **philo, int numb_of_philo)
+void					init_philos(t_philo *philo, t_info *info)
 {
 	int		i;
 
 	i = 0;
-	while (i < numb_of_philo)
+	while (i < info->numb)
 	{
-		(*philo[i]).philo = NULL;
-		pthread_mutex_init(&(*philo)[i].left_fork);
-		pthread_mutex_init(&(*philo)[i].right_fork);
-		(*philo)[i].num = i + 1;
+		philo[i].info = info;
+		philo[i].life_cycle = 0;
+		philo[i].left_fork = (i + 1) % philo[i].info->numb;
+		philo[i].right_fork = i % philo[i].info->numb;
+		philo[i].num = i + 1;
 		i++;
 	}
 }
 
-void					destroy_philo(t_philo **philo, int numb_of_philo)
+int 					create_and_destroy_philo(t_philo *philo, int numb)
+{
+	int 				start;
+	int 				end;
+	int 				status;
+
+	start = 0;
+	end = 0;
+	while (start < numb)
+	{
+		status = pthread_create(&philo[start++].philo, NULL, routine, (void*)philo);
+		if (status)
+		{
+			write(2, "Error: pthread_create\n", 22);
+			return (0);
+		}
+	}
+	while (end < numb)
+	{
+		status = pthread_join(philo[end++].philo, NULL);
+		if (status)
+		{
+			write(2, "Error: pthread_join\n", 20);
+			return (0);
+		}
+	}
+	return (1);
+}
+
+void					destroy_philo(t_philo *philo)
 {
 	int					i;
 
 	i = 0;
-	while (i < numb_of_philo)
+	while (i < philo->info->numb)
 	{
-		pthread_join((*philo)[i++]->philo);
-		(*philo)[i++]->philo = NULL;
+		pthread_join(philo[i].philo, NULL);
 	}
 }
 
@@ -181,43 +179,33 @@ void					destroy_init(t_info *info)
 	int					i;
 
 	i = 0;
-	free(info->philo);
 }
 
 int						main(int argc, char **argv)
 {
-	int					i;
+	int i;
 	t_info				info;
-	t_philo				**philo;
-	int					num;
+	t_philo				*philo;
 
-	if (argc == 4 || argc == 5)
+	int					num;
+	if (argc == 5 || argc == 6)
 	{
-//		info.time =
-		info.must_eat = ternar_int((argc == 5), 0, -1);
-		if (!init_info(&info))
-			continue ;
-		philo = malloc(sizeof(t_philo*) * init.numb);
+		info.must_eat = ternar_int((argc == 6), 0, -1);
+		if (!init_info(&info, argv))
+			return (-1);
+		philo = malloc(sizeof(t_philo) * info.numb);
 		if (!philo)
-			continue ;
-		init_philo(&philo, &init);
+			return (0);
+		init_philos(philo, &info);
+		myusleep(200000);
 		while (TRUE)
 		{
-			i = 0;
-			while (i < init.numb_of_philo)
-			{
-				pthread_create(&philo[i]->philo, NULL, &routine, &(void*)philo);
-
-				destroy_philo(&philo);
-				if (init.must_eat == init.numb_philo_must_eat)
-					break ;
-				destroy_philo(&init->philo[i]);
-				i++;
-			}
-			/* usleep(3000000); */
+			create_and_destroy_philo(philo, info.numb);
+			if (info.must_eat == info.numb_must_eat)
+				break ;
 		}
 		free(philo);
-		destroy_init(&init);
+		destroy_init(&info);
 	}
 	else
 		write(2, COUNT_PARAMS, 26);
