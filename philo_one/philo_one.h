@@ -46,15 +46,14 @@
 typedef struct			s_info
 {
 	pthread_mutex_t		*forks;
-	pthread_mutex_t 	block_eat;
-	pthread_mutex_t 	block_sleep;
-	pthread_mutex_t		block_think;
-	int					numb;
-	int					die;
-	int					eat;
-	int					sleep;
+	pthread_mutex_t 	block;
+	int					numb_of_philo;
+	int					time_to_die;
+	int					time_to_eat;
+	int					time_to_sleep;
 	int					numb_must_eat;
 	int					must_eat;
+	int 				died;
 	struct timeval		start_time;
 	struct timeval		real_time;
 }						t_info;
@@ -67,10 +66,15 @@ typedef struct			s_philo
 	int 				left_fork;
 	int 				right_fork;
 	int					num;
+	int 				ate;
+	struct timeval		start_time;
+	struct timeval		real_time;
 }						t_philo;
 
 int						ft_atoi(const char *str);
 int						ternar_int(int condition, int p1, int p2);
 void					myusleep(int microsec);
+void 					print_message(t_philo *philo, long time, char *p1, char *p2);
+long 					lifetime(struct timeval *start_time, struct timeval *current_time, int ident);
 
 #endif

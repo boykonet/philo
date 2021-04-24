@@ -47,3 +47,26 @@ void		myusleep(int microsec)
 		usleep(100);
 	}
 }
+
+void 					print_message(t_philo *philo, long time, char *p1, char *p2)
+{
+	pthread_mutex_lock(&philo->info->block);
+	printf("%ld %d %s", time, philo->num + 1, p1);
+	if (p2)
+		printf(" %s", p2);
+	printf("\n");
+	pthread_mutex_unlock(&philo->info->block);
+}
+
+long 					lifetime(struct timeval *start_time, struct timeval *current_time, int ident)
+{
+	if (gettimeofday(current_time, NULL) == -1)
+		return (0);
+	if (!ident && start_time->tv_sec == 0 && start_time->tv_usec == 0)
+	{
+		start_time->tv_sec = current_time->tv_sec;
+		start_time->tv_usec = current_time->tv_usec;
+	}
+	return ((current_time->tv_sec - start_time->tv_sec) * 1000
+			+ (current_time->tv_usec - start_time->tv_usec) / 1000);
+}
