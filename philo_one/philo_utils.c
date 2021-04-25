@@ -1,6 +1,6 @@
 #include "philo_one.h"
 
-int			ft_atoi(const char *str)
+int			ft_strtoi(const char *str, void **endptr)
 {
 	int		flag;
 	long	digit;
@@ -10,7 +10,7 @@ int			ft_atoi(const char *str)
 	if (str == NULL)
 		return (0);
 	while (*str && (*str == ' ' || *str == '\n' || *str == '\t'
-					|| *str == '\r' || *str == '\f' || *str == '\v'))
+	|| *str == '\r' || *str == '\f' || *str == '\v'))
 		str++;
 	if (*str == '-' || *str == '+')
 	{
@@ -18,8 +18,10 @@ int			ft_atoi(const char *str)
 			flag = -1;
 		str++;
 	}
-	while (*str)
+	while (*str >= '0' && *str <= '9')
 		digit = digit * 10 + *str++ - '0';
+	if (endptr)
+		*endptr = (void*)str;
 	return ((int)(digit * flag));
 }
 
@@ -62,7 +64,7 @@ long 					lifetime(struct timeval *start_time, struct timeval *current_time, int
 {
 	if (gettimeofday(current_time, NULL) == -1)
 		return (0);
-	if (!ident && start_time->tv_sec == 0 && start_time->tv_usec == 0)
+	if (ident)
 	{
 		start_time->tv_sec = current_time->tv_sec;
 		start_time->tv_usec = current_time->tv_usec;

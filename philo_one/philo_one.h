@@ -10,7 +10,7 @@
 # define PHILO_THINK			"is thinking"
 # define PHILO_DIED			"died"
 # define COUNT_PARAMS		"Count params is incorrect\n"
-# define CORRECT_PARAMS		"Input params is incorrect\n"
+# define INCORRECT_PARAMS	"Input params is incorrect\n"
 
 # define FALSE				0
 # define TRUE				1
@@ -62,16 +62,16 @@ typedef struct			s_philo
 {
 	t_info				*info;
 	pthread_t			philo;
-	long int			life_cycle;
 	int 				left_fork;
 	int 				right_fork;
 	int					num;
 	int 				ate;
+	int 				died;
 	struct timeval		start_time;
 	struct timeval		real_time;
 }						t_philo;
 
-int						ft_atoi(const char *str);
+int						ft_strtoi(const char *str, void **endptr);
 int						ternar_int(int condition, int p1, int p2);
 void					myusleep(int microsec);
 void 					print_message(t_philo *philo, long time, char *p1, char *p2);
