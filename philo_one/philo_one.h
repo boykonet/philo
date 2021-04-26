@@ -53,6 +53,7 @@ typedef struct			s_info
 	int					time_to_sleep;
 	int					numb_must_eat;
 	int					must_eat;
+	int 				philos_ate;
 	int 				died;
 	struct timeval		start_time;
 	struct timeval		real_time;
@@ -66,7 +67,6 @@ typedef struct			s_philo
 	int 				right_fork;
 	int					num;
 	int 				ate;
-	int 				died;
 	struct timeval		start_time;
 	struct timeval		real_time;
 }						t_philo;
