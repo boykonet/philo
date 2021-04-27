@@ -14,15 +14,20 @@
 
 void					philo_eat(t_philo *philo, int left_fork, int right_fork)
 {
+	pthread_mutex_lock(&philo->info->block_forks);
 	pthread_mutex_lock(&philo->info->forks[left_fork]);
 	print_message(philo, lifetime(&philo->info->start_time, &philo->info->real_time, 0), TAKEN_FORK, LEFT_FORK);
 
 	pthread_mutex_lock(&philo->info->forks[right_fork]);
 	print_message(philo,lifetime(&philo->info->start_time, &philo->info->real_time, 0), TAKEN_FORK, RIGHT_FORK);
+	pthread_mutex_unlock(&philo->info->block_forks);
 
 	lifetime(&philo->start_time, &philo->real_time, 1);
 
 	philo->ate = 0;
+	if (philo->info->died == 1 || philo->info->philos_ate == 1)
+		return ;
+
 	print_message(philo, lifetime(&philo->info->start_time, &philo->info->real_time, 0), PHILO_EAT, NULL);
 	myusleep(philo->info->time_to_eat * 1000);
 
@@ -39,22 +44,22 @@ void					philo_eat(t_philo *philo, int left_fork, int right_fork)
 
 void					*routine(void *philo)
 {
-//	pthread_detach(((t_philo*)philo)->philo);
+	pthread_detach(((t_philo*)philo)->philo);
 	while (!((t_philo*)philo)->info->died && !((t_philo*)philo)->info->philos_ate)
 	{
-		if (!((t_philo*)philo)->info->died)
+		if (!((t_philo*)philo)->info->died && !((t_philo*)philo)->info->philos_ate)
 			philo_eat(philo, ((t_philo*)philo)->left_fork, ((t_philo*)philo)->right_fork);
 
 		if (((t_philo*)philo)->info->philos_ate)
 			break ;
 
-		if (!((t_philo*)philo)->info->died)
+		if (!((t_philo*)philo)->info->died && !((t_philo*)philo)->info->philos_ate)
 		{
 			print_message(philo, lifetime(&((t_philo*)philo)->info->start_time, &((t_philo*)philo)->info->real_time, 0), PHILO_SLEEP, NULL);
 			myusleep(((t_philo*)philo)->info->time_to_sleep * 1000);
 		}
 
-		if (!((t_philo*)philo)->info->died)
+		if (!((t_philo*)philo)->info->died && !((t_philo*)philo)->info->philos_ate)
 			print_message(philo, lifetime(&((t_philo*)philo)->info->start_time, &((t_philo*)philo)->info->real_time, 0), PHILO_THINK, NULL);
 
 	}
@@ -83,7 +88,8 @@ int						params_for_philo(char *str, int *data)
 int						init_info(t_info *info, int argc, char **argv)
 {
 	info->must_eat = ternar_int((argc == 6), 0, -1);
-	pthread_mutex_init(&info->block, NULL);
+	pthread_mutex_init(&info->block_message, NULL);
+	pthread_mutex_init(&info->block_forks, NULL);
 	if (!params_for_philo(argv[1], &info->numb_of_philo))
 		return (0);
 	if (!params_for_philo(argv[2], &info->time_to_die))
@@ -97,8 +103,8 @@ int						init_info(t_info *info, int argc, char **argv)
 		if (!params_for_philo(argv[5], &info->numb_must_eat))
 			return (0);
 
-	if (info->numb_of_philo < 0 || info->time_to_die < 0 || info->time_to_eat < 0
-	|| info->time_to_sleep < 0 || (!info->must_eat && info->numb_must_eat < 0))
+	if (info->numb_of_philo <= 2 || info->time_to_die <= 0 || info->time_to_eat <= 0
+	|| info->time_to_sleep <= 0 || (!info->must_eat && info->numb_must_eat <= 0))
 	{
 		write(2, INCORRECT_PARAMS, 26);
 		return (0);
@@ -129,31 +135,30 @@ void					init_philos(t_philo *philo, t_info *info)
 	}
 }
 
-int 					join_philo(t_philo *philo, int numb)
-{
-	int 				i;
-	int 				count = 0;
-	int 				status;
-	void 				*ptr;
-
-	while (count < 2)
-	{
-		i = ternar_int(count == 0, 0, 1);
-		while (i < numb)
-		{
-			lifetime(&philo[i].start_time, &philo[i].real_time, 1);
-			status = pthread_join(philo[i].philo, &ptr);
-			if (status)
-			{
-				write(2, "Error: pthread_join\n", 20);
-				return (0);
-			}
-			i += 2;
-		}
-		count++;
-	}
-	return (1);
-}
+//int 					join_philo(t_philo *philo, int numb)
+//{
+//	int 				i;
+//	int 				count = 0;
+//	int 				status;
+//	void 				*ptr;
+//
+//	while (count < 2)
+//	{
+//		i = ternar_int(count == 0, 0, 1);
+//		while (i < numb)
+//		{
+//			status = pthread_join(philo[i].philo, &ptr);
+//			if (status)
+//			{
+//				write(2, "Error: pthread_join\n", 20);
+//				return (0);
+//			}
+//			i += 2;
+//		}
+//		count++;
+//	}
+//	return (1);
+//}
 
 int 					create_philo(t_philo *philo, int numb)
 {
@@ -177,7 +182,7 @@ int 					create_philo(t_philo *philo, int numb)
 			i += 2;
 		}
 		if (count == 0)
-			myusleep(100);
+			myusleep(200);
 		count++;
 	}
 	return (1);
@@ -188,7 +193,8 @@ void					destroy_init(t_info *info)
 	int 				i;
 
 	i = 0;
-	pthread_mutex_destroy(&info->block);
+	pthread_mutex_destroy(&info->block_message);
+	pthread_mutex_destroy(&info->block_forks);
 	while (i < info->numb_of_philo)
 		pthread_mutex_destroy(&info->forks[i++]);
 	free(info->forks);
@@ -198,40 +204,38 @@ int 					check_die(t_philo *philo, t_info *info)
 {
 	int 				i;
 	int 				count_eat;
-	int 				flag;
 
-	flag = 0;
 	while (!info->died && !info->philos_ate)
 	{
 		i = 0;
 		count_eat = 0;
 		while (i < info->numb_of_philo)
 		{
-			if (lifetime(&philo[i].start_time, &philo[i].real_time, 0) >= philo[i].info->time_to_die)
+			if (lifetime(&philo[i].start_time, &philo[i].real_time, 0) >= info->time_to_die)
 			{
-				philo[i].info->died = 1;
-				print_message(&philo[i], lifetime(&philo[i].info->start_time, &philo[i].info->real_time, 0), PHILO_DIED, NULL);
+				info->died = 1;
+				print_message(&philo[i], lifetime(&info->start_time, &info->real_time, 0), PHILO_DIED, NULL);
 				return (0);
 			}
-			if (philo[i].info->must_eat != -1 && philo[i].ate == 1)
+			if (info->must_eat != -1 && philo[i].ate == 1)
 			{
 				philo[i].ate = 0;
 				count_eat++;
 			}
-			if (philo[i].info->must_eat != -1 && count_eat == info->numb_of_philo)
+			if (info->must_eat != -1 && count_eat == info->numb_of_philo)
 			{
 				count_eat = 0;
-				philo[i].info->must_eat++;
+				info->must_eat++;
 			}
-			if (philo[i].info->must_eat != -1 && philo[i].info->must_eat == philo[i].info->numb_must_eat)
+			if (info->must_eat != -1 && info->must_eat == info->numb_must_eat)
 			{
-				philo[i].info->philos_ate = 1;
-				flag = 1;
+				info->philos_ate = 1;
 				break ;
 			}
+			usleep(10);
 			i++;
 		}
-		if (flag == 1)
+		if (info->philos_ate == 1)
 			break ;
 	}
 	return (1);
@@ -259,8 +263,8 @@ int						main(int argc, char **argv)
 	init_philos(philo, &info);
 	create_philo(philo, info.numb_of_philo);
 	check_die(philo, &info);
-	if (!join_philo(philo, info.numb_of_philo))
-		status = 1;
+//	if (!join_philo(philo, info.numb_of_philo))
+//		status = 1;
 	destroy_init(&info);
 	free(philo);
 	return (status);

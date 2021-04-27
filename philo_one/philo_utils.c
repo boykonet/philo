@@ -52,15 +52,12 @@ void		myusleep(int microsec)
 
 void 					print_message(t_philo *philo, long time, char *p1, char *p2)
 {
-	pthread_mutex_lock(&philo->info->block);
-	if (!strcmp(p1, PHILO_DIED))
-		printf("\e[1;31m%ld %d %s\e[0m", time, philo->num + 1, p1);
-	else
-		printf("%ld %d %s", time, philo->num + 1, p1);
+	pthread_mutex_lock(&philo->info->block_message);
+	printf("%ld %d %s", time, philo->num + 1, p1);
 	if (p2)
 		printf(" %s", p2);
 	printf("\n");
-	pthread_mutex_unlock(&philo->info->block);
+	pthread_mutex_unlock(&philo->info->block_message);
 }
 
 long 					lifetime(struct timeval *start_time, struct timeval *current_time, int ident)
