@@ -17,8 +17,8 @@ INCLUDEDIR = ./
 
 all: $(NAME)
 
-$(NAME): $(OBJS) $(HEADERS)
-	$(CC) $(CFLAGS) -I $(INCLUDEDIR) -o $@
+$(NAME): $(OBJS)
+	$(CC) $(CFLAGS) -I $(INCLUDEDIR) $^ -o $@
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -I $(INCLUDEDIR) -c $< -o $@
@@ -26,7 +26,7 @@ $(NAME): $(OBJS) $(HEADERS)
 clean:
 	rm -rf $(OBJS)
 
-fcrean: clean
+fclean: clean
 	rm -rf $(NAME)
 
 re: fclean all
