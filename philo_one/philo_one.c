@@ -12,31 +12,38 @@
 
 #include "philo_one.h"
 
-void	philo_eat(t_philo *philo, int left_fork, int right_fork)
+int	philo_eat(t_philo *philo, int left_fork, int right_fork)
 {
-	if (philo->ate != -1)
-	{
-		pthread_mutex_lock(&philo->info->forks[left_fork]);
-		print_message(philo, lifetime(&philo->info->start_time,
-				&philo->info->real_time, 0), TAKEN_FORK, LEFT_FORK);
-		pthread_mutex_lock(&philo->info->forks[right_fork]);
-		print_message(philo, lifetime(&philo->info->start_time,
-				&philo->info->real_time, 0), TAKEN_FORK, RIGHT_FORK);
-		lifetime(&philo->start_time, &philo->real_time, 1);
-		if (philo->info->died == 1)
-			return ;
-		print_message(philo, lifetime(&philo->info->start_time,
-				&philo->info->real_time, 0), PHILO_EAT, NULL);
-		myusleep(philo->info->time_to_eat * 1000);
-		if (philo->info->must_eat != -1 && philo->ate != -1)
-			philo->ate++;
-		pthread_mutex_unlock(&philo->info->forks[right_fork]);
-		print_message(philo, lifetime(&philo->info->start_time,
-				&philo->info->real_time, 0), PUT_FORK, RIGHT_FORK);
-		pthread_mutex_unlock(&philo->info->forks[left_fork]);
-		print_message(philo, lifetime(&philo->info->start_time,
-				&philo->info->real_time, 0), PUT_FORK, LEFT_FORK);
-	}
+	if (pthread_mutex_lock(&philo->info->forks[left_fork]))
+		return (ternar_int(write(2, PTH_M_LOCK, 37) > 0, 1, 0));
+	print_message(philo, lifetime(&philo->info->start_time,
+			&philo->info->real_time, 0), TAKEN_FORK, LEFT_FORK);
+
+	if (pthread_mutex_lock(&philo->info->forks[right_fork]))
+		return (ternar_int(write(2, PTH_M_LOCK, 37) > 0, 1, 0));
+	print_message(philo, lifetime(&philo->info->start_time,
+			&philo->info->real_time, 0), TAKEN_FORK, RIGHT_FORK);
+
+	lifetime(&philo->start_time, &philo->real_time, 1);
+
+	print_message(philo, lifetime(&philo->info->start_time,
+			&philo->info->real_time, 0), PHILO_EAT, NULL);
+
+	myusleep(philo->info->time_to_eat * 1000);
+
+	if (philo->info->must_eat != -1 && philo->ate != -1)
+		philo->ate++;
+
+	if (pthread_mutex_unlock(&philo->info->forks[right_fork]))
+		return (ternar_int(write(2, PTH_M_UNLOCK, 39) > 0, 1, 0));
+	print_message(philo, lifetime(&philo->info->start_time,
+			&philo->info->real_time, 0), PUT_FORK, RIGHT_FORK);
+	if (pthread_mutex_unlock(&philo->info->forks[left_fork]))
+
+		return (ternar_int(write(2, PTH_M_UNLOCK, 39) > 0, 1, 0));
+	print_message(philo, lifetime(&philo->info->start_time,
+			&philo->info->real_time, 0), PUT_FORK, LEFT_FORK);
+	return (0);
 }
 
 void	*routine(void *philo)
@@ -44,8 +51,9 @@ void	*routine(void *philo)
 	while (!((t_philo *)philo)->info->died)
 	{
 		if (!((t_philo *)philo)->info->died)
-			philo_eat(philo, ((t_philo *)philo)->left_fork,
-				((t_philo *)philo)->right_fork);
+			if (philo_eat(philo, ((t_philo *)philo)->left_fork,
+				((t_philo *)philo)->right_fork))
+				return (NULL);
 		if (((t_philo *)philo)->info->must_eat != -1
 			&& ((t_philo *)philo)->ate == -1)
 			break ;
@@ -61,7 +69,7 @@ void	*routine(void *philo)
 					&((t_philo *)philo)->info->real_time, 0),
 				 	PHILO_THINK, NULL);
 	}
-	return (NULL);
+	return (philo);
 }
 
 void	check_die(t_philo *p, t_info *info)
@@ -100,25 +108,28 @@ int	main(int argc, char **argv)
 {
 	t_info	info;
 	t_philo	*philo;
-	int		status;
+	int 	status;
 
 	status = 0;
 	if (argc != 5 && argc != 6)
 	{
-		write(2, COUNT_PARAMS, 26);
+		write(2, COUNT_PARAMS, 37);
 		return (1);
 	}
-	if (!init_info(&info, argc, argv))
+	if (init_info(&info, argc, argv))
 		return (1);
 	philo = malloc(sizeof(t_philo) * info.numb_of_philo);
 	if (!philo)
-		return (0);
-	init_philos(philo, &info);
-	create_philo(philo, info.numb_of_philo);
-	check_die(philo, &info);
-	if (!join_philo(philo, info.numb_of_philo))
 		status = 1;
-	destroy_init(&info);
+	if (!status)
+		init_philos(philo, &info);
+	if (!status && create_philo(philo, info.numb_of_philo))
+		status = 1;
+	if (!status)
+		check_die(philo, &info);
+	if (join_philo(philo, info.numb_of_philo))
+		status = 1;
+	destroy_info(&info);
 	free(philo);
 	return (status);
 }

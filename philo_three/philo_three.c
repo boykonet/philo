@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo_two.h"
+#include "philo_three.h"
 
 void	philo_eat(t_philo *philo)
 {
@@ -103,24 +103,21 @@ int	main(int argc, char **argv)
 
 	status = 0;
 	if (argc != 5 && argc != 6)
-	{
-		write(2, COUNT_PARAMS, 26);
-		return (1);
-	}
-	if (!init_info(&info, argc, argv))
+		return (ternar_int(write(2, COUNT_PARAMS, 26) > 0, 1, 0));
+	if (init_info(&info, argc, argv))
 		return (1);
 	philo = malloc(sizeof(t_philo) * info.numb_of_philo);
 	if (!philo)
-	{
-		destroy_init(&info);
-		return (0);
-	}
-	init_philos(philo, &info);
-	create_philo(philo, info.numb_of_philo);
-	check_die(philo, &info);
-	if (!join_philo(philo, info.numb_of_philo))
 		status = 1;
-	destroy_init(&info);
+	if (!status)
+		init_philos(philo, &info);
+	if (!status && create_philo(philo, info.numb_of_philo))
+		status = 1;
+	if (!status)
+		check_die(philo, &info);
+	if (!status && !join_philo(philo, info.numb_of_philo))
+		status = 1;
+	destroy_info(&info);
 	free(philo);
 	return (status);
 }

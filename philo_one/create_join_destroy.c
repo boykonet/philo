@@ -3,7 +3,6 @@
 int	create_philo(t_philo *philo, int numb)
 {
 	int	i;
-	int	status;
 	int	count;
 
 	count = 0;
@@ -12,27 +11,24 @@ int	create_philo(t_philo *philo, int numb)
 		i = ternar_int(count == 0, 0, 1);
 		while (i < numb)
 		{
-			lifetime(&philo[i].start_time, &philo[i].real_time, 1);
-			status = pthread_create(&philo[i].philo, NULL, routine, &philo[i]);
-			if (status)
-			{
-				write(2, PTHREAD_CREATE, 22);
-				return (0);
-			}
+			if (lifetime(&philo[i].start_time, &philo[i].real_time, 1) == -1)
+				return (1);
+			if (pthread_create(&philo[i].philo, NULL, routine, &philo[i]))
+				return (ternar_int(write(2, PTH_CREATE, 22) > 0, 1, 0));
 			i += 2;
 		}
 		if (count == 0)
-			myusleep(500);
+			if (myusleep(500) == -1)
+				return (1);
 		count++;
 	}
-	return (1);
+	return (0);
 }
 
 int	join_philo(t_philo *philo, int numb)
 {
 	int		i;
 	int		count;
-	int		status;
 	void	*ptr;
 
 	count = 0;
@@ -41,27 +37,40 @@ int	join_philo(t_philo *philo, int numb)
 		i = ternar_int(count == 0, 0, 1);
 		while (i < numb)
 		{
-			status = pthread_join(philo[i].philo, &ptr);
-			if (status)
-			{
-				write(2, PTHREAD_JOIN, 20);
-				return (0);
-			}
+			if (pthread_join(philo[i].philo, &ptr))
+				return (ternar_int(write(2, PTH_JOIN, 20) > 0, 1, 0));
+			if (!ptr)
+				return (1);
 			i += 2;
 		}
 		count++;
 	}
-	return (1);
+	return (0);
 }
 
-void	destroy_init(t_info *info)
+int	destroy_info(t_info *info)
 {
 	int	i;
+	int status;
 
 	i = 0;
-	pthread_mutex_destroy(&info->block_message);
-	pthread_mutex_destroy(&info->increment_eat);
+	status = 0;
+	if (pthread_mutex_unlock(&info->block_message))
+		printf("cho delaesh???\n");
+	if (pthread_mutex_destroy(&info->block_message))
+	{
+		write(2, PTH_M_DESTROY, 40);
+		status = 1;
+	}
 	while (i < info->numb_of_philo)
-		pthread_mutex_destroy(&info->forks[i++]);
+	{
+		if (pthread_mutex_destroy(&info->forks[i++]))
+		{
+//			printf("PRIVETIKI\n");
+			write(2, PTH_M_DESTROY, 40);
+			status = 1;
+		}
+	}
 	free(info->forks);
+	return (status);
 }
