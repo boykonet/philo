@@ -2,7 +2,6 @@
 # define PHILO_ONE_H
 
 # define TAKEN_FORK			"has taken a"
-# define PUT_FORK			"put down a"
 # define LEFT_FORK			"left fork"
 # define RIGHT_FORK			"right fork"
 # define PHILO_EAT			"is eating"
@@ -94,12 +93,14 @@ typedef struct s_info
 	struct timeval	real_time;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	block_message;
+	pthread_mutex_t	valera;
 	int				numb_of_philo;
 	int				time_to_die;
 	int				time_to_eat;
 	int				time_to_sleep;
 	int				numb_must_eat;
 	int				must_eat;
+	int 			philos_eat;
 	int				died;
 }					t_info;
 

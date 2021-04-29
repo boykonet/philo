@@ -55,8 +55,9 @@ int	destroy_info(t_info *info)
 
 	i = 0;
 	status = 0;
-	if (pthread_mutex_unlock(&info->block_message))
-		printf("cho delaesh???\n");
+//	if (pthread_mutex_unlock(&info->block_message))
+//		printf("cho delaesh???\n");
+	pthread_mutex_destroy(&info->valera);
 	if (pthread_mutex_destroy(&info->block_message))
 	{
 		write(2, PTH_M_DESTROY, 40);

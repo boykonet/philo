@@ -1,17 +1,5 @@
 #include "philo_one.h"
 
-int	ft_strcmp(const char *s1, const char *s2)
-{
-	while (*s1 || *s2)
-	{
-		if (*s1 != *s2)
-			return ((unsigned char)*s1 - (unsigned char)*s2);
-		s1++;
-		s2++;
-	}
-	return (0);
-}
-
 int	ft_strtoi(const char *str, void **endptr)
 {
 	int	flag;
@@ -68,18 +56,18 @@ int	myusleep(int microsec)
 
 int	print_message(t_philo *philo, long time, char *p1, char *p2)
 {
-	if (philo->info->died == 1 || (philo->info->must_eat != -1
-		&& (philo->info->must_eat == philo->info->numb_of_philo)))
+	if (philo->info->died == 1 || philo->info->philos_eat == 1)
+		return (0);
+	if (pthread_mutex_lock(&philo->info->block_message))
 		return (1);
-	pthread_mutex_lock(&philo->info->block_message);
-	printf("%ld %d %s", time, philo->num + 1, p1);
+	if (philo->info->died == 1 || philo->info->philos_eat == 1)
+		return (0);
+	printf("%6ld %d %s", time, philo->num + 1, p1);
 	if (p2)
 		printf(" %s", p2);
 	printf("\n");
-	if (!ft_strcmp(PHILO_DIED, p1) || (philo->info->must_eat != -1
-		&& (philo->info->must_eat == philo->info->numb_of_philo)))
-		return (0);
-	pthread_mutex_unlock(&philo->info->block_message);
+	if (pthread_mutex_unlock(&philo->info->block_message))
+		return (1);
 	return (0);
 }
 
@@ -94,5 +82,5 @@ long	lifetime(struct timeval *start_time,
 		start_time->tv_usec = current_time->tv_usec;
 	}
 	return ((current_time->tv_sec - start_time->tv_sec) * 1000
-		+ (current_time->tv_usec - start_time->tv_usec) / 1000);
+		+ (current_time->tv_usec - start_time->tv_usec) * 0.001);
 }
