@@ -1,6 +1,6 @@
 NAME = philo_one
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -g -Wall -Wextra -Werror -fsanitize=address #-fsanitize=leak
 
 CC = gcc
 

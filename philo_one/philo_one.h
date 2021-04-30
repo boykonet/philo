@@ -93,7 +93,7 @@ typedef struct s_info
 	struct timeval	real_time;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	block_message;
-	pthread_mutex_t	valera;
+	pthread_mutex_t	block_data;
 	int				numb_of_philo;
 	int				time_to_die;
 	int				time_to_eat;
@@ -127,7 +127,7 @@ void				init_philos(t_philo *philo, t_info *info);
 int					init_info(t_info *info, int argc, char **argv);
 int 				destroy_info(t_info *info);
 int					create_philo(t_philo *philo, int numb);
-int					join_philo(t_philo *philo, int numb);
+int					join_philo(t_philo *philo, int num);
 void				*routine(void *philo);
 
 #endif

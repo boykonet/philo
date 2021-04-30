@@ -71,6 +71,7 @@ typedef struct s_info
 	struct timeval	real_time;
 	sem_t			*forks;
 	sem_t			*block_message;
+	sem_t			*block_data;
 	pid_t			pids[200];
 	int				numb_of_philo;
 	int				time_to_die;

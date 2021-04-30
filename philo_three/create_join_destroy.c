@@ -18,6 +18,7 @@ int	create_philo(t_philo *philo, int numb)
 				lifetime(&philo[i].start_time, &philo[i].real_time, 1);
 				if (pthread_create(&philo[i].philo, NULL, routine, &philo[i]))
 					exit(ternar_int(write(2, PTHREAD_CREATE, 22) > 0, 1, 0));
+				
 			}
 			else
 				return (ternar_int(write(2, ERR_FORK, 13) > 0, 1, 0));

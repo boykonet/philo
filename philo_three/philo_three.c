@@ -12,50 +12,61 @@
 
 #include "philo_three.h"
 
-void	philo_eat(t_philo *philo)
+int	philo_eat(t_philo *philo)
 {
+	sem_wait(philo->info->forks);
+	print_message(philo, lifetime(&philo->info->start_time,
+			&philo->info->real_time, 0), TAKEN_FORK, LEFT_FORK);
+
+	sem_wait(philo->info->forks);
+	print_message(philo, lifetime(&philo->info->start_time,
+			&philo->info->real_time, 0), TAKEN_FORK, RIGHT_FORK);
+
+	lifetime(&philo->start_time, &philo->real_time, 1);
+
+	print_message(philo, lifetime(&philo->info->start_time,
+			&philo->info->real_time, 0), PHILO_EAT, NULL);
+
+	myusleep(philo->info->time_to_eat * 1000);
+
 	if (philo->ate != -1)
+		philo->ate++;
+		
+	if (philo->info->must_eat != -1 && philo->ate != -1)
+		philo->ate++;
+
+	sem_post(philo->info->forks);
+	sem_post(philo->info->forks);
+
+	if (philo->ate == philo->info->numb_must_eat)
 	{
-		sem_wait(philo->info->forks);
-		print_message(philo, lifetime(&philo->info->start_time,
-				&philo->info->real_time, 0), TAKEN_FORK, LEFT_FORK);
-		sem_wait(philo->info->forks);
-		print_message(philo, lifetime(&philo->info->start_time,
-				&philo->info->real_time, 0), TAKEN_FORK, RIGHT_FORK);
-		lifetime(&philo->start_time, &philo->real_time, 1);
-		if (philo->info->died == 1)
-			return ;
-		print_message(philo, lifetime(&philo->info->start_time,
-				&philo->info->real_time, 0), PHILO_EAT, NULL);
-		myusleep(philo->info->time_to_eat * 1000);
-		if (philo->info->must_eat != -1 && philo->ate != -1)
-			philo->ate++;
-		sem_post(philo->info->forks);
-		print_message(philo, lifetime(&philo->info->start_time,
-				&philo->info->real_time, 0), PUT_FORK, RIGHT_FORK);
-		sem_post(philo->info->forks);
-		print_message(philo, lifetime(&philo->info->start_time,
-				&philo->info->real_time, 0), PUT_FORK, LEFT_FORK);
+		sem_wait(&philo->info->block_data);
+		philo->info->must_eat++;
+		pthread_mutex_unlock(&philo->info->block_data);
+		return (2);
 	}
 }
 
 void	*routine(void *philo)
 {
-	while (!((t_philo *)philo)->info->died)
+	int status;
+
+	while (!((t_philo *)philo)->info->died && !((t_philo *)philo)->info->philos_eat)
 	{
 		if (!((t_philo *)philo)->info->died)
-			philo_eat(philo);
-		if (((t_philo *)philo)->info->must_eat != -1
-			&& ((t_philo *)philo)->ate == -1)
-			break ;
-		if (!((t_philo *)philo)->info->died)
+		{
+			status = philo_eat(philo, ((t_philo *)philo)->left_fork, ((t_philo *)philo)->right_fork);
+			if (status == 2)
+				break ;
+		}
+		if (!((t_philo *)philo)->info->died && !((t_philo *)philo)->info->philos_eat)
 		{
 			print_message(philo, lifetime(&((t_philo *)philo)->info->start_time,
 					&((t_philo *)philo)->info->real_time, 0),
 				 	PHILO_SLEEP, NULL);
 			myusleep(((t_philo *)philo)->info->time_to_sleep * 1000);
 		}
-		if (!((t_philo *)philo)->info->died)
+		if (!((t_philo *)philo)->info->died && !((t_philo *)philo)->info->philos_eat)
 			print_message(philo, lifetime(&((t_philo *)philo)->info->start_time,
 					&((t_philo *)philo)->info->real_time, 0),
 				 	PHILO_THINK, NULL);
@@ -113,10 +124,10 @@ int	main(int argc, char **argv)
 		init_philos(philo, &info);
 	if (!status && create_philo(philo, info.numb_of_philo))
 		status = 1;
-	if (!status)
-		check_die(philo, &info);
-	if (!status && !join_philo(philo, info.numb_of_philo))
-		status = 1;
+	// if (!status)
+	// 	check_die(philo, &info);
+	// if (!status && join_philo(philo, info.numb_of_philo))
+	// 	status = 1;
 	destroy_info(&info);
 	free(philo);
 	return (status);

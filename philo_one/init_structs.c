@@ -58,7 +58,7 @@ int	init_info(t_info *info, int argc, char **argv)
 		return (1);
 	if (init_mutex(&info->block_message, 1))
 		return (1);
-	if (init_mutex(&info->valera, 1))
+	if (init_mutex(&info->block_data, 1))
 		return (1);
 	lifetime(&info->start_time, &info->real_time, 1);
 	return (0);
@@ -74,7 +74,7 @@ void	init_philos(t_philo *philo, t_info *info)
 		philo[i].info = info;
 		philo[i].left_fork = (i + 1) % philo[i].info->numb_of_philo;
 		philo[i].right_fork = i % philo[i].info->numb_of_philo;
-		philo[i].ate = 0;
+		philo[i].ate = ternar_int(info->must_eat == -1, -1, 0);
 		philo[i].num = i;
 		i++;
 	}

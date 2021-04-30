@@ -45,6 +45,7 @@ int	init_info(t_info *info, int argc, char **argv)
 		return (ternar_int(write(2, INCORRECT_PARAMS, 26) > 0, 1, 0));
 	info->died = 0;
 	info->block_message = create_new_sem("block_message");
+	info->block_data = create_new_sem("block_data");
 	info->forks = create_new_sem("forks");
 	if (!info->block_message || !info->forks)
 		return (1);
