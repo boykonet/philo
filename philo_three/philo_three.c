@@ -31,20 +31,19 @@ int	philo_eat(t_philo *philo)
 
 	if (philo->ate != -1)
 		philo->ate++;
-		
-	if (philo->info->must_eat != -1 && philo->ate != -1)
-		philo->ate++;
 
 	sem_post(philo->info->forks);
+
 	sem_post(philo->info->forks);
 
 	if (philo->ate == philo->info->numb_must_eat)
 	{
-		sem_wait(&philo->info->block_data);
+		sem_wait(philo->info->block_data);
 		philo->info->must_eat++;
-		pthread_mutex_unlock(&philo->info->block_data);
+		sem_post(philo->info->block_data);
 		return (2);
 	}
+	return (0);
 }
 
 void	*routine(void *philo)
@@ -55,7 +54,7 @@ void	*routine(void *philo)
 	{
 		if (!((t_philo *)philo)->info->died)
 		{
-			status = philo_eat(philo, ((t_philo *)philo)->left_fork, ((t_philo *)philo)->right_fork);
+			status = philo_eat(philo);
 			if (status == 2)
 				break ;
 		}
@@ -77,29 +76,25 @@ void	*routine(void *philo)
 void	check_die(t_philo *p, t_info *info)
 {
 	int	i;
+	int	num;
 
 	while (TRUE)
 	{
 		i = 0;
 		while (i < info->numb_of_philo)
 		{
-			if (lifetime(&p[i].start_time, &p[i].real_time, 0)
-				>= info->time_to_die)
+			if ((num = lifetime(&p[i].start_time, &p[i].real_time, 0)) >= (double)info->time_to_die)
 			{
-				print_message(&p[i], lifetime(&info->start_time,
-						&info->real_time, 0), PHILO_DIED, NULL);
-				info->died = 1;
+				printf("num = %d\n", num);
+				print_message(&p[i], lifetime(&info->start_time, &info->real_time, 0), PHILO_DIED, NULL);
 				return ;
 			}
-			if (info->must_eat != -1 && (p[i].ate == info->numb_must_eat))
+			if (info->must_eat == info->numb_of_philo)
 			{
-				p[i].ate = -1;
-				info->must_eat++;
-				if (info->must_eat == info->numb_of_philo)
-				{
-					myusleep(500);
-					return ;
-				}
+				sem_wait(info->block_data);
+				info->philos_eat = 1;
+				sem_post(info->block_data);
+				return ;
 			}
 			i++;
 		}
@@ -122,7 +117,7 @@ int	main(int argc, char **argv)
 		status = 1;
 	if (!status)
 		init_philos(philo, &info);
-	if (!status && create_philo(philo, info.numb_of_philo))
+	if (!status && create_process_treads(philo, &info))
 		status = 1;
 	// if (!status)
 	// 	check_die(philo, &info);

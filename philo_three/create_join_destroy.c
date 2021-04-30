@@ -1,6 +1,6 @@
 #include "philo_three.h"
 
-int	create_philo(t_philo *philo, int numb)
+int	create_process_treads(t_philo *philo, t_info *info)
 {
 	int	i;
 	int	status;
@@ -10,68 +10,43 @@ int	create_philo(t_philo *philo, int numb)
 	while (count < 2)
 	{
 		i = ternar_int(count == 0, 0, 1);
-		while (i < numb)
+		while (i < info->numb_of_philo)
 		{
 			philo[i].info->pids[i] = fork();
 			if (!philo[i].info->pids[i])
 			{
 				lifetime(&philo[i].start_time, &philo[i].real_time, 1);
 				if (pthread_create(&philo[i].philo, NULL, routine, &philo[i]))
-					exit(ternar_int(write(2, PTHREAD_CREATE, 22) > 0, 1, 0));
-				
+					exit(ternar_int(write(2, PTH_CREATE, 22) > 0, 1, 0));
+				check_die(&philo[i], info);
+				pthread_join(philo[i].philo, NULL);
+				exit(1);
 			}
 			else
-				return (ternar_int(write(2, ERR_FORK, 13) > 0, 1, 0));
+				return (ternar_int(write(2, ERR_FORK, 23) > 0, 1, 0));
 			i += 2;
 		}
 		if (count == 0)
-			myusleep(500);
+			myusleep(philo[0].info->time_to_eat * 0.99 * 1000);
 		count++;
 	}
 	waitpid(-1, &status, WUNTRACED);
 	status = WEXITSTATUS(status);
 	i = 0;
-	if (status)
+	while (i < info->numb_of_philo)
 	{
-		while (i < numb)
-		{
-			kill(philo[i].info->pids[i], SIGKILL);
-			i++;
-		}
+		kill(philo[i].info->pids[i], SIGKILL);
+		i++;
 	}
 	return (0);
-}
-
-int	join_philo(t_philo *philo, int numb)
-{
-	int		i;
-	int		count;
-	int		status;
-	void	*ptr;
-
-	count = 0;
-	while (count < 2)
-	{
-		i = ternar_int(count == 0, 0, 1);
-		while (i < numb)
-		{
-			status = pthread_join(philo[i].philo, &ptr);
-			if (status)
-			{
-				write(2, PTHREAD_JOIN, 20);
-				return (0);
-			}
-			i += 2;
-		}
-		count++;
-	}
-	return (1);
 }
 
 void	destroy_info(t_info *info)
 {
 	sem_close(info->block_message);
+	sem_close(info->block_data);
 	sem_close(info->forks);
 	sem_unlink("forks");
 	sem_unlink("block_message");
+	sem_unlink("data");
 }
