@@ -6,6 +6,7 @@ int	create_process_treads(t_philo *philo, t_info *info)
 	int	status;
 	int	count;
 
+	// i = 0;
 	count = 0;
 	while (count < 2)
 	{
@@ -18,11 +19,12 @@ int	create_process_treads(t_philo *philo, t_info *info)
 				lifetime(&philo[i].start_time, &philo[i].real_time, 1);
 				if (pthread_create(&philo[i].philo, NULL, routine, &philo[i]))
 					exit(ternar_int(write(2, PTH_CREATE, 22) > 0, 1, 0));
+				myusleep(info->time_to_eat * 0.99 * 1000);
 				check_die(&philo[i], info);
 				pthread_join(philo[i].philo, NULL);
 				exit(1);
 			}
-			else
+			if (philo[i].info->pids[i] < 0)
 				return (ternar_int(write(2, ERR_FORK, 23) > 0, 1, 0));
 			i += 2;
 		}

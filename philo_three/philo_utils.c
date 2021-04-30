@@ -80,6 +80,8 @@ int	print_message(t_philo *philo, long time, char *p1, char *p2)
 		if (!ft_strcmp(PHILO_DIED, p1))
 			philo->info->died = 1;
 	}
+	else
+		return (0);
 	sem_post(philo->info->block_message);
 	return (0);
 }
