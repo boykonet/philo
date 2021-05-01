@@ -90,10 +90,11 @@
 typedef struct s_info
 {
 	struct timeval	start_time;
-	struct timeval	real_time;
+	struct timeval	curr_time;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	block_message;
 	pthread_mutex_t	block_data;
+	pthread_mutex_t	block_time;
 	int				numb_of_philo;
 	int				time_to_die;
 	int				time_to_eat;
@@ -106,8 +107,8 @@ typedef struct s_info
 
 typedef struct s_philo
 {
-	struct timeval	start_time;
-	struct timeval	real_time;
+	struct timeval	life_time;
+	struct timeval	curr_time;
 	t_info			*info;
 	pthread_t		philo;
 	int				left_fork;
@@ -121,8 +122,9 @@ int					ternar_int(int condition, int p1, int p2);
 int 				myusleep(int microsec);
 int 				print_message(t_philo *philo, long time,
 						char *p1, char *p2);
-long				lifetime(struct timeval *start_time,
-						struct timeval *current_time, int ident);
+long				lifetime(pthread_mutex_t *block_time,
+				 		struct timeval *start_time,
+				 		struct timeval *curr_time, int ident);
 void				init_philos(t_philo *philo, t_info *info);
 int					init_info(t_info *info, int argc, char **argv);
 int 				destroy_info(t_info *info);

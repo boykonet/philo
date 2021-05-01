@@ -19,7 +19,7 @@ static int	params_for_philo(char *str, int *data)
 
 	*data = ft_strtoi(str, &endptr);
 	if (*(char *)endptr)
-		return (ternar_int(write(2, INCORRECT_PARAMS, 26) > 0, 1, 0));
+		return (ternar_int(write(2, INCORRECT_PARAMS, 37) > 0, 1, 0));
 	return (0);
 }
 
@@ -60,7 +60,9 @@ int	init_info(t_info *info, int argc, char **argv)
 		return (1);
 	if (init_mutex(&info->block_data, 1))
 		return (1);
-	lifetime(&info->start_time, &info->real_time, 1);
+	if (init_mutex(&info->block_time, 1))
+		return (1);
+	lifetime(&info->block_time, &info->start_time, &info->curr_time, 1);
 	return (0);
 }
 

@@ -51,17 +51,17 @@ int	myusleep(int microsec)
 	long int		num;
 
 	if (gettimeofday(&start_t, NULL) == -1)
-		return (ternar_int(write(2, ERR_GETTIME, 20) > 0, -1, 0));
+		return (ternar_int(write(2, ERR_GETTIME, 31) > 0, -1, 0));
 	while (TRUE)
 	{
 		if (gettimeofday(&real_t, NULL) == -1)
-			return (ternar_int(write(2, ERR_GETTIME, 20) > 0, -1, 0));
+			return (ternar_int(write(2, ERR_GETTIME, 31) > 0, -1, 0));
 		num = (real_t.tv_sec - start_t.tv_sec) * 1000000
 			+ (real_t.tv_usec - start_t.tv_usec);
 		if (num >= microsec)
 			break ;
-		if (usleep(50) == -1)
-			return (ternar_int(write(2, ERR_USLEEP, 14) > 0, -1, 0));
+		if (usleep(100) == -1)
+			return (ternar_int(write(2, ERR_USLEEP, 25) > 0, -1, 0));
 	}
 	return (0);
 }
@@ -84,16 +84,18 @@ int	print_message(t_philo *philo, long time, char *p1, char *p2)
 	return (0);
 }
 
-long	lifetime(struct timeval *start_time,
-		struct timeval *current_time, int ident)
+long	lifetime(pthread_mutex_t *block_time, struct timeval *start_time,
+			struct timeval *curr_time, int ident)
 {
-	if (gettimeofday(current_time, NULL) == -1)
+	pthread_mutex_lock(block_time);
+	if (gettimeofday(curr_time, NULL) == -1)
 		return (-1);
 	if (ident)
 	{
-		start_time->tv_sec = current_time->tv_sec;
-		start_time->tv_usec = current_time->tv_usec;
+		start_time->tv_sec = curr_time->tv_sec;
+		start_time->tv_usec = curr_time->tv_usec;
 	}
-	return (((current_time->tv_sec * 1000 + current_time->tv_usec / 1000)
+	pthread_mutex_unlock(block_time);
+	return (((curr_time->tv_sec * 1000 + curr_time->tv_usec / 1000)
 	- (start_time->tv_sec * 1000 + start_time->tv_usec / 1000)));
 }
