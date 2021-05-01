@@ -4,10 +4,10 @@
 # define TAKEN_FORK			"has taken a"
 # define LEFT_FORK			"left fork"
 # define RIGHT_FORK			"right fork"
-# define PHILO_EAT			"is eating"
-# define PHILO_SLEEP		"is sleeping"
-# define PHILO_THINK		"is thinking"
-# define PHILO_DIED			"\e[1;31mdied\e[0m"
+# define PH_EAT				"is eating"
+# define PH_SLEEP			"is sleeping"
+# define PH_THINK			"is thinking"
+# define PH_DIED			"\e[1;31mdied\e[0m"
 /*
 ** 15
 */
@@ -34,14 +34,6 @@
 # define PTH_M_DESTROY		"\e[1;31mError: pthread_mutex_destroy\e[0m\n"
 /*
 ** 40
-*/
-# define PTH_M_LOCK			"\e[1;31mError: pthread_mutex_lock\e[0m\n"
-/*
-** 37
-*/
-# define PTH_M_UNLOCK		"\e[1;31mError: pthread_mutex_unlock\e[0m\n"
-/*
-** 37
 */
 # define ERR_USLEEP			"\e[1;31mError: usleep\e[0m\n"
 /*
@@ -101,7 +93,7 @@ typedef struct s_info
 	int				time_to_sleep;
 	int				numb_must_eat;
 	int				must_eat;
-	int 			philos_eat;
+	int				philos_eat;
 	int				died;
 }					t_info;
 
@@ -118,18 +110,19 @@ typedef struct s_philo
 }					t_philo;
 
 int					ft_strtoi(const char *str, void **endptr);
+int					ft_strcmp(const char *s1, const char *s2);
 int					ternar_int(int condition, int p1, int p2);
-int 				myusleep(int microsec);
-int 				print_message(t_philo *philo, long time,
+int					myusleep(int microsec);
+int					message(t_philo *ph, long time,
 						char *p1, char *p2);
 long				lifetime(pthread_mutex_t *block_time,
-				 		struct timeval *start_time,
-				 		struct timeval *curr_time, int ident);
-void				init_philos(t_philo *philo, t_info *info);
+						struct timeval *start_time,
+						struct timeval *curr_time, int ident);
+void				init_philos(t_philo *ph, t_info *info);
 int					init_info(t_info *info, int argc, char **argv);
-int 				destroy_info(t_info *info);
-int					create_philo(t_philo *philo, int numb);
-int					join_philo(t_philo *philo, int num);
-void				*routine(void *philo);
+int					destroy_info(t_info *info);
+int					create_philo(t_philo *ph, int numb);
+int					join_philo(t_philo *ph, int num);
+void				*routine(void *ph);
 
 #endif

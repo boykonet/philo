@@ -8,7 +8,7 @@ static int	init_mutex(pthread_mutex_t *mutex, int numb)
 	while (i < numb)
 	{
 		if (pthread_mutex_init(&mutex[i++], NULL))
-			return (ternar_int(write(2, PTH_M_INIT, 26) > 0, 1, 0));
+			return (ternar_int(write(2, PTH_M_INIT, 37) > 0, 1, 0));
 	}
 	return (0);
 }
@@ -23,7 +23,7 @@ static int	params_for_philo(char *str, int *data)
 	return (0);
 }
 
-int correct_argv(t_info *info, int argc, char **argv)
+int	correct_argv(t_info *info, int argc, char **argv)
 {
 	info->must_eat = ternar_int((argc == 6), 0, -1);
 	if (params_for_philo(argv[1], &info->numb_of_philo))
@@ -40,7 +40,8 @@ int correct_argv(t_info *info, int argc, char **argv)
 			return (1);
 	if (info->numb_of_philo <= 2 || info->numb_of_philo > 200
 		|| info->time_to_die <= 0 || info->time_to_eat <= 0
-		|| info->time_to_sleep <= 0 || (!info->must_eat && info->numb_must_eat <= 0))
+		|| info->time_to_sleep <= 0
+		|| (!info->must_eat && info->numb_must_eat <= 0))
 		return (ternar_int(write(2, INCORRECT_PARAMS, 37) > 0, 1, 0));
 	return (0);
 }
@@ -74,8 +75,18 @@ void	init_philos(t_philo *philo, t_info *info)
 	while (i < info->numb_of_philo)
 	{
 		philo[i].info = info;
-		philo[i].left_fork = (i + 1) % philo[i].info->numb_of_philo;
-		philo[i].right_fork = i % philo[i].info->numb_of_philo;
+		if (i < info->numb_of_philo - 1)
+		{
+			philo[i].left_fork = (i + 1) % philo[i].info->numb_of_philo;
+			philo[i].right_fork = i % philo[i].info->numb_of_philo;
+//			printf("left - %d, right - %d\n", philo[i].left_fork, philo[i].right_fork);
+		}
+		else
+		{
+			philo[i].left_fork = i % philo[i].info->numb_of_philo;
+			philo[i].right_fork = (i + 1) % philo[i].info->numb_of_philo;
+//			printf("left - %d, right - %d\n", philo[i].left_fork, philo[i].right_fork);
+		}
 		philo[i].ate = ternar_int(info->must_eat == -1, -1, 0);
 		philo[i].num = i;
 		i++;

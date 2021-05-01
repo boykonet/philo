@@ -6,8 +6,9 @@ CC = gcc
 
 SRCS =			./philo_one.c \
 				./philo_utils.c \
-				./init_structs.c \
-				./create_join_destroy.c
+				./philo_utils2.c \
+				./create_join_destroy.c \
+				./init.c
 
 OBJS = $(SRCS:%.c=%.o)
 

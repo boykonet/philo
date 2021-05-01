@@ -4,10 +4,10 @@
 # define TAKEN_FORK			"has taken a"
 # define LEFT_FORK			"left fork"
 # define RIGHT_FORK			"right fork"
-# define PHILO_EAT			"is eating"
-# define PHILO_SLEEP		"is sleeping"
-# define PHILO_THINK		"is thinking"
-# define PHILO_DIED			"\e[1;31mdied\e[0m"
+# define PH_EAT				"is eating"
+# define PH_SLEEP			"is sleeping"
+# define PH_THINK			"is thinking"
+# define PH_DIED			"\e[1;31mdied\e[0m"
 /*
 ** 15
 */
@@ -41,7 +41,7 @@
 */
 # define PTH_M_UNLOCK		"\e[1;31mError: pthread_mutex_unlock\e[0m\n"
 /*
-** 37
+** 39
 */
 # define ERR_USLEEP			"\e[1;31mError: usleep\e[0m\n"
 /*
@@ -60,7 +60,7 @@
 ** pthread_detach
 ** pthread_join
 */
-#include <semaphore.h>
+# include <semaphore.h>
 /*
 ** sem_open
 ** sem_close
@@ -94,10 +94,11 @@
 typedef struct s_info
 {
 	struct timeval	start_time;
-	struct timeval	real_time;
+	struct timeval	curr_time;
 	sem_t			*forks;
 	sem_t			*block_message;
 	sem_t			*block_data;
+	sem_t			*block_time;
 	int				numb_of_philo;
 	int				time_to_die;
 	int				time_to_eat;
@@ -110,8 +111,8 @@ typedef struct s_info
 
 typedef struct s_philo
 {
-	struct timeval	start_time;
-	struct timeval	real_time;
+	struct timeval	life_time;
+	struct timeval	curr_time;
 	t_info			*info;
 	pthread_t		philo;
 	int				num;
@@ -119,15 +120,16 @@ typedef struct s_philo
 }					t_philo;
 
 int					ft_strtoi(const char *str, void **endptr);
+int					ft_strcmp(const char *s1, const char *s2);
 int					ternar_int(int condition, int p1, int p2);
 int					myusleep(int microsec);
-int					print_message(t_philo *philo, long time,
+int					message(t_philo *philo, long time,
 						char *p1, char *p2);
-long				lifetime(struct timeval *start_time,
-						struct timeval *current_time, int ident);
+long				lifetime(sem_t *block_time, struct timeval *start_time,
+						struct timeval *curr_time, int ident);
 void				init_philos(t_philo *philo, t_info *info);
 int					init_info(t_info *info, int argc, char **argv);
-void				destroy_info(t_info *info);
+int					destroy_info(t_info *info);
 int					create_philo(t_philo *philo, int numb);
 int					join_philo(t_philo *philo, int numb);
 void				*routine(void *philo);

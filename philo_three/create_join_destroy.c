@@ -17,6 +17,7 @@ int	create_process_treads(t_philo *philo, t_info *info)
 			if (!philo[i].info->pids[i])
 			{
 				lifetime(&philo[i].start_time, &philo[i].real_time, 1);
+//				routine(&philo[i]);
 				if (pthread_create(&philo[i].philo, NULL, routine, &philo[i]))
 					exit(ternar_int(write(2, PTH_CREATE, 22) > 0, 1, 0));
 				myusleep(info->time_to_eat * 0.99 * 1000);
