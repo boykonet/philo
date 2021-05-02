@@ -1,6 +1,6 @@
 #include "philo_three.h"
 
-int	create_process_treads(t_philo *philo, t_info *info)
+int	create_process_treads(t_philo *ph, t_info *info)
 {
 	int	i;
 	int	status;
@@ -13,43 +13,57 @@ int	create_process_treads(t_philo *philo, t_info *info)
 		i = ternar_int(count == 0, 0, 1);
 		while (i < info->numb_of_philo)
 		{
-			philo[i].info->pids[i] = fork();
-			if (!philo[i].info->pids[i])
+			ph[i].info->pids[i] = fork();
+			if (!ph[i].info->pids[i])
 			{
-				lifetime(&philo[i].start_time, &philo[i].real_time, 1);
-//				routine(&philo[i]);
-				if (pthread_create(&philo[i].philo, NULL, routine, &philo[i]))
-					exit(ternar_int(write(2, PTH_CREATE, 22) > 0, 1, 0));
+				lifetime(ph[i].info->block_time, &ph[i].life_time, &ph[i].curr_time, 1);
+				if (pthread_create(&ph[i].philo, NULL, routine, &ph[i]))
+					exit(ternar_int(write(2, PTH_CREATE, 33) > 0, 1, 0));
 				myusleep(info->time_to_eat * 0.99 * 1000);
-				check_die(&philo[i], info);
-				pthread_join(philo[i].philo, NULL);
-				exit(1);
+				if (check_die(&ph[i], info) == 1)
+					exit(1);
+				else
+				{
+					pthread_join(ph[i].philo, NULL);
+					exit(2);
+				}
 			}
-			if (philo[i].info->pids[i] < 0)
+			if (ph[i].info->pids[i] < 0)
 				return (ternar_int(write(2, ERR_FORK, 23) > 0, 1, 0));
 			i += 2;
 		}
 		if (count == 0)
-			myusleep(philo[0].info->time_to_eat * 0.99 * 1000);
+			myusleep(ph[0].info->time_to_eat * 0.9 * 1000);
 		count++;
 	}
-	waitpid(-1, &status, WUNTRACED);
-	status = WEXITSTATUS(status);
 	i = 0;
-	while (i < info->numb_of_philo)
+	while (i < ph->info->numb_of_philo)
 	{
-		kill(philo[i].info->pids[i], SIGKILL);
-		i++;
+		waitpid(-1, &status, WUNTRACED);
+		if ((status = WEXITSTATUS(status)) == 1)
+		{
+			i = 0;
+			while (i < info->numb_of_philo)
+			{
+				// printf("PRIV\n");
+				kill(ph[i].info->pids[i], SIGKILL);
+				i++;
+			}
+			return (1);
+		}
 	}
 	return (0);
 }
 
-void	destroy_info(t_info *info)
+int	destroy_info(t_info *info)
 {
+	sem_close(info->forks);
 	sem_close(info->block_message);
 	sem_close(info->block_data);
-	sem_close(info->forks);
+	sem_close(info->block_time);
 	sem_unlink("forks");
 	sem_unlink("block_message");
-	sem_unlink("data");
+	sem_unlink("block_data");
+	sem_unlink("block_time");
+	return (0);
 }

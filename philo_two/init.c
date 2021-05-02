@@ -71,7 +71,7 @@ void	init_philos(t_philo *philo, t_info *info)
 	while (i < info->numb_of_philo)
 	{
 		philo[i].info = info;
-		philo[i].ate = 0;
+		philo[i].ate = ternar_int(info->must_eat == -1, -1, 0);
 		philo[i].num = i;
 		i++;
 	}
