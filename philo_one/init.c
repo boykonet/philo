@@ -63,6 +63,8 @@ int	init_info(t_info *info, int argc, char **argv)
 		return (1);
 	if (init_mutex(&info->block_time, 1))
 		return (1);
+	if (init_mutex(&info->waiter, 1))
+		return (1);
 	lifetime(&info->block_time, &info->start_time, &info->curr_time, 1);
 	return (0);
 }
@@ -75,18 +77,20 @@ void	init_philos(t_philo *philo, t_info *info)
 	while (i < info->numb_of_philo)
 	{
 		philo[i].info = info;
-		if (i < info->numb_of_philo - 1)
-		{
-			philo[i].left_fork = (i + 1) % philo[i].info->numb_of_philo;
-			philo[i].right_fork = i % philo[i].info->numb_of_philo;
-//			printf("left - %d, right - %d\n", philo[i].left_fork, philo[i].right_fork);
-		}
-		else
-		{
-			philo[i].left_fork = i % philo[i].info->numb_of_philo;
-			philo[i].right_fork = (i + 1) % philo[i].info->numb_of_philo;
-//			printf("left - %d, right - %d\n", philo[i].left_fork, philo[i].right_fork);
-		}
+		philo[i].left_fork = (i + 1) % philo[i].info->numb_of_philo;
+		philo[i].right_fork = i % philo[i].info->numb_of_philo;
+// 		if (i < info->numb_of_philo - 1)
+// 		{
+// 			philo[i].left_fork = (i + 1) % philo[i].info->numb_of_philo;
+// 			philo[i].right_fork = i % philo[i].info->numb_of_philo;
+// //			printf("left - %d, right - %d\n", philo[i].left_fork, philo[i].right_fork);
+// 		}
+// 		else
+// 		{
+// 			philo[i].left_fork = i % philo[i].info->numb_of_philo;
+// 			philo[i].right_fork = (i + 1) % philo[i].info->numb_of_philo;
+// //			printf("left - %d, right - %d\n", philo[i].left_fork, philo[i].right_fork);
+// 		}
 		philo[i].ate = ternar_int(info->must_eat == -1, -1, 0);
 		philo[i].num = i;
 		i++;

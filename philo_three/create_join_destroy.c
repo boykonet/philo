@@ -19,7 +19,7 @@ int	create_process_treads(t_philo *ph, t_info *info)
 				lifetime(ph[i].info->block_time, &ph[i].life_time, &ph[i].curr_time, 1);
 				if (pthread_create(&ph[i].philo, NULL, routine, &ph[i]))
 					exit(ternar_int(write(2, PTH_CREATE, 33) > 0, 1, 0));
-				myusleep(info->time_to_eat * 0.99 * 1000);
+				myusleep(100);
 				if (check_die(&ph[i], info) == 1)
 					exit(1);
 				else

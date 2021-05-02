@@ -87,6 +87,7 @@ typedef struct s_info
 	pthread_mutex_t	block_message;
 	pthread_mutex_t	block_data;
 	pthread_mutex_t	block_time;
+	pthread_mutex_t	waiter;
 	int				numb_of_philo;
 	int				time_to_die;
 	int				time_to_eat;

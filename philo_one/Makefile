@@ -1,6 +1,6 @@
 NAME = philo_one
 
-CFLAGS = -g -Wall -Wextra -Werror -fsanitize=address #-fsanitize=leak
+CFLAGS = -g -Wall -Wextra -Werror
 
 CC = gcc
 
@@ -19,7 +19,7 @@ INCLUDEDIR = ./
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	$(CC) $(CFLAGS) -I $(INCLUDEDIR) $^ -o $@
+	$(CC) $(CFLAGS) -pthread -I $(INCLUDEDIR) $^ -o $@
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -I $(INCLUDEDIR) -c $< -o $@

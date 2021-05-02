@@ -15,6 +15,7 @@ int	create_philo(t_philo *ph, int numb)
 				&ph[i].curr_time, 1);
 			if (pthread_create(&ph[i].philo, NULL, routine, &ph[i]))
 				return (ternar_int(write(2, PTH_CREATE, 22) > 0, 1, 0));
+			myusleep(100);
 			i += 2;
 		}
 		if (count == 0)
@@ -46,7 +47,8 @@ int	destroy_info(t_info *info)
 	status = 0;
 	if (pthread_mutex_destroy(&info->block_message)
 		|| pthread_mutex_destroy(&info->block_data)
-		|| pthread_mutex_destroy(&info->block_time))
+		|| pthread_mutex_destroy(&info->block_time)
+		|| pthread_mutex_destroy(&info->waiter))
 	{
 		write(2, PTH_M_DESTROY, 40);
 		status = 1;

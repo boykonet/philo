@@ -16,7 +16,7 @@ int	myusleep(int microsec)
 			+ (real_t.tv_usec - start_t.tv_usec);
 		if (num >= microsec)
 			break ;
-		if (usleep(100) == -1)
+		if (usleep(50) == -1)
 			return (ternar_int(write(2, ERR_USLEEP, 25) > 0, -1, 0));
 	}
 	return (0);

@@ -14,10 +14,12 @@
 
 int	philo_eat(t_philo *ph, int l_fork, int r_fork)
 {
+	// pthread_mutex_lock(&ph->info->waiter);
 	pthread_mutex_lock(&ph->info->forks[l_fork]);
 	message(ph, lifetime(&ph->info->block_time, &ph->info->start_time,
 			&ph->info->curr_time, 0), TAKEN_FORK, LEFT_FORK);
 	pthread_mutex_lock(&ph->info->forks[r_fork]);
+	// pthread_mutex_unlock(&ph->info->waiter);
 	message(ph, lifetime(&ph->info->block_time, &ph->info->start_time,
 			&ph->info->curr_time, 0), TAKEN_FORK, RIGHT_FORK);
 	lifetime(&ph->info->block_time, &ph->life_time,
