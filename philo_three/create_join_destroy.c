@@ -6,7 +6,6 @@ int	create_process_treads(t_philo *ph, t_info *info)
 	int	status;
 	int	count;
 
-	// i = 0;
 	count = 0;
 	while (count < 2)
 	{
@@ -14,7 +13,7 @@ int	create_process_treads(t_philo *ph, t_info *info)
 		while (i < info->numb_of_philo)
 		{
 			ph[i].info->pids[i] = fork();
-			if (!ph[i].info->pids[i])
+			if (ph[i].info->pids[i] == 0)
 			{
 				lifetime(ph[i].info->block_time, &ph[i].life_time, &ph[i].curr_time, 1);
 				if (pthread_create(&ph[i].philo, NULL, routine, &ph[i]))
@@ -23,10 +22,7 @@ int	create_process_treads(t_philo *ph, t_info *info)
 				if (check_die(&ph[i], info) == 1)
 					exit(1);
 				else
-				{
-					pthread_join(ph[i].philo, NULL);
 					exit(2);
-				}
 			}
 			if (ph[i].info->pids[i] < 0)
 				return (ternar_int(write(2, ERR_FORK, 23) > 0, 1, 0));
@@ -39,18 +35,20 @@ int	create_process_treads(t_philo *ph, t_info *info)
 	i = 0;
 	while (i < ph->info->numb_of_philo)
 	{
-		waitpid(-1, &status, WUNTRACED);
-		if ((status = WEXITSTATUS(status)) == 1)
+		waitpid(0, &status, WUNTRACED);
+		status = WEXITSTATUS(status);
+		if (status == 1)
 		{
 			i = 0;
 			while (i < info->numb_of_philo)
 			{
-				// printf("PRIV\n");
 				kill(ph[i].info->pids[i], SIGKILL);
 				i++;
 			}
 			return (1);
 		}
+		else if (status == 2)
+			i++;
 	}
 	return (0);
 }

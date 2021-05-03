@@ -31,9 +31,9 @@ int	philo_eat(t_philo *ph)
 	sem_post(ph->info->forks);
 	if (ph->ate == ph->info->numb_must_eat)
 	{
-		sem_wait(ph->info->block_data);
+		/* sem_wait(ph->info->block_data); */
 		ph->info->must_eat++;
-		sem_post(ph->info->block_data);
+		/* sem_post(ph->info->block_data); */
 		return (2);
 	}
 	return (0);
@@ -41,6 +41,7 @@ int	philo_eat(t_philo *ph)
 
 void	*routine(void *ph)
 {
+	pthread_detach(((t_philo *)ph)->philo);
 	while (!((t_philo *)ph)->info->died
 		&& !((t_philo *)ph)->info->philos_eat)
 	{
@@ -66,31 +67,20 @@ void	*routine(void *ph)
 
 int	check_die(t_philo *ph, t_info *info)
 {
-	int	i;
-
 	while (TRUE)
 	{
-		i = 0;
-		while (i < info->numb_of_philo)
+		if (lifetime(ph->info->block_time, &ph->life_time,
+				&ph->curr_time, 0) >= info->time_to_die)
 		{
-			if (lifetime(ph[i].info->block_time, &ph[i].life_time,
-					&ph[i].curr_time, 0) >= info->time_to_die)
-			{
-				message(&ph[i], lifetime(ph[i].info->block_time,
-						&info->start_time, &info->curr_time, 0), PH_DIED, NULL);
-				return (1);
-			}
-			if (info->must_eat == info->numb_of_philo)
-			{
-				sem_wait(info->block_data);
-				info->philos_eat = 1;
-				sem_post(info->block_data);
-				return (2);
-			}
-			i++;
+			message(ph, lifetime(ph->info->block_time,
+					&info->start_time, &info->curr_time, 0), PH_DIED, NULL);
+			return (1);
 		}
+		if (info->must_eat > 0)
+			return (2);
 		myusleep(1000);
 	}
+	return (0);
 }
 
 int	main(int argc, char **argv)

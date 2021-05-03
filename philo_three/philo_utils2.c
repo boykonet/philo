@@ -32,7 +32,7 @@ int	message(t_philo *ph, long time, char *p1, char *p2)
 			printf(" %s", p2);
 		printf("\n");
 		if (!ft_strcmp(PH_DIED, p1))
-			ph->info->died = 1;
+			return (1);
 	}
 	sem_post(ph->info->block_message);
 	return (0);
