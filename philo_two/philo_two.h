@@ -90,6 +90,7 @@
 /*
 ** gettimeofday
 */
+# include <fcntl.h>
 
 typedef struct s_info
 {

@@ -16,7 +16,7 @@ int	myusleep(int microsec)
 			+ (real_t.tv_usec - start_t.tv_usec);
 		if (num >= microsec)
 			break ;
-		if (usleep(100) == -1)
+		if (usleep(50) == -1)
 			return (ternar_int(write(2, ERR_USLEEP, 25) > 0, -1, 0));
 	}
 	return (0);
@@ -25,15 +25,12 @@ int	myusleep(int microsec)
 int	message(t_philo *ph, long time, char *p1, char *p2)
 {
 	sem_wait(ph->info->block_message);
-	if (!ph->info->died && !ph->info->philos_eat)
-	{
-		printf("%6ld %d %s", time, ph->num + 1, p1);
-		if (p2)
-			printf(" %s", p2);
-		printf("\n");
-		if (!ft_strcmp(PH_DIED, p1))
-			return (1);
-	}
+	printf("%6ld %d %s", time, ph->num + 1, p1);
+	if (p2)
+		printf(" %s", p2);
+	printf("\n");
+	if (!ft_strcmp(PH_DIED, p1))
+		return (1);
 	sem_post(ph->info->block_message);
 	return (0);
 }

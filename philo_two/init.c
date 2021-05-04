@@ -36,7 +36,7 @@ int	correct_argv(t_info *info, int argc, char **argv)
 	if (!info->must_eat)
 		if (params_for_philo(argv[5], &info->numb_must_eat))
 			return (1);
-	if (info->numb_of_philo <= 2 || info->numb_of_philo > 200
+	if (info->numb_of_philo < 2 || info->numb_of_philo > 200
 		|| info->time_to_die <= 0 || info->time_to_eat <= 0
 		|| info->time_to_sleep <= 0
 		|| (!info->must_eat && info->numb_must_eat <= 0))

@@ -55,6 +55,10 @@
 /*
 ** 23
 */
+# define ERR_WAITPID		"\e[1;31mError: waitpid\e[0m\n"
+/*
+** 26
+*/
 
 # define TRUE	1
 
@@ -64,7 +68,7 @@
 ** pthread_detach
 ** pthread_join
 */
-#include <semaphore.h>
+# include <semaphore.h>
 /*
 ** sem_open
 ** sem_close
@@ -96,14 +100,15 @@
 /*
 ** gettimeofday
 */
-#include <signal.h>
+# include <signal.h>
 /*
 ** kill
 */
-#include <sys/wait.h>
+# include <sys/wait.h>
 /*
 ** waitpid
 */
+# include <fcntl.h>
 
 typedef struct s_info
 {
@@ -111,7 +116,6 @@ typedef struct s_info
 	struct timeval	curr_time;
 	sem_t			*forks;
 	sem_t			*block_message;
-	sem_t			*block_data;
 	sem_t			*block_time;
 	pid_t			pids[200];
 	int				numb_of_philo;
@@ -120,8 +124,6 @@ typedef struct s_info
 	int				time_to_sleep;
 	int				numb_must_eat;
 	int				must_eat;
-	int				philos_eat;
-	int				died;
 }					t_info;
 
 typedef struct s_philo

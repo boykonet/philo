@@ -15,10 +15,11 @@ int	create_philo(t_philo *ph, int numb)
 				&ph[i].curr_time, 1);
 			if (pthread_create(&ph[i].philo, NULL, routine, &ph[i]))
 				return (ternar_int(write(2, PTH_CREATE, 22) > 0, 1, 0));
+			myusleep(100);
 			i += 2;
 		}
 		if (count == 0)
-			myusleep(ph[0].info->time_to_eat * 0.99 * 1000);
+			myusleep(ph[0].info->time_to_eat * 0.9 * 1000);
 		count++;
 	}
 	return (0);

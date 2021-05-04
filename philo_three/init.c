@@ -21,7 +21,7 @@ static int	params_for_philo(char *str, int *data)
 	return (0);
 }
 
-int correct_argv(t_info *info, int argc, char **argv)
+int	correct_argv(t_info *info, int argc, char **argv)
 {
 	info->must_eat = ternar_int((argc == 6), 0, -1);
 	if (params_for_philo(argv[1], &info->numb_of_philo))
@@ -36,7 +36,7 @@ int correct_argv(t_info *info, int argc, char **argv)
 	if (!info->must_eat)
 		if (params_for_philo(argv[5], &info->numb_must_eat))
 			return (1);
-	if (info->numb_of_philo <= 2 || info->numb_of_philo > 200
+	if (info->numb_of_philo < 2 || info->numb_of_philo > 200
 		|| info->time_to_die <= 0 || info->time_to_eat <= 0
 		|| info->time_to_sleep <= 0
 		|| (!info->must_eat && info->numb_must_eat <= 0))
@@ -48,14 +48,11 @@ int	init_info(t_info *info, int argc, char **argv)
 {
 	if (correct_argv(info, argc, argv))
 		return (1);
-	info->died = 0;
-	info->philos_eat = 0;
 	info->forks = create_new_sem("forks", info->numb_of_philo);
 	info->block_message = create_new_sem("block_message", 1);
-	info->block_data = create_new_sem("block_data", 1);
 	info->block_time = create_new_sem("block_time", 1);
 	if (!info->block_message || !info->forks
-		|| !info->block_data || !info->block_time)
+		|| !info->block_time)
 	{
 		return (1);
 	}

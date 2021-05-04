@@ -6,7 +6,7 @@
 /*   By: gkarina <gkarina@student.21-school.ru>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/23 00:26:42 by gkarina           #+#    #+#             */
-/*   Updated: 2021/05/01 19:20:58 by gkarina          ###   ########.fr       */
+/*   Updated: 2021/05/03 18:54:35 by gkarina          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,10 @@
 
 int	philo_eat(t_philo *ph, int l_fork, int r_fork)
 {
-	// pthread_mutex_lock(&ph->info->waiter);
 	pthread_mutex_lock(&ph->info->forks[l_fork]);
 	message(ph, lifetime(&ph->info->block_time, &ph->info->start_time,
 			&ph->info->curr_time, 0), TAKEN_FORK, LEFT_FORK);
 	pthread_mutex_lock(&ph->info->forks[r_fork]);
-	// pthread_mutex_unlock(&ph->info->waiter);
 	message(ph, lifetime(&ph->info->block_time, &ph->info->start_time,
 			&ph->info->curr_time, 0), TAKEN_FORK, RIGHT_FORK);
 	lifetime(&ph->info->block_time, &ph->life_time,

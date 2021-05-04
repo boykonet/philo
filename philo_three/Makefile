@@ -19,7 +19,7 @@ INCLUDEDIR = ./
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	$(CC) $(CFLAGS) -I $(INCLUDEDIR) $^ -o $@
+	$(CC) $(CFLAGS) -pthread -I $(INCLUDEDIR) $^ -o $@
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -I $(INCLUDEDIR) -c $< -o $@

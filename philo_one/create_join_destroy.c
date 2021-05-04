@@ -19,7 +19,7 @@ int	create_philo(t_philo *ph, int numb)
 			i += 2;
 		}
 		if (count == 0)
-			myusleep(ph[0].info->time_to_eat * 0.99 * 1000);
+			myusleep(ph[0].info->time_to_eat * 0.9 * 1000);
 		count++;
 	}
 	return (0);
@@ -47,8 +47,7 @@ int	destroy_info(t_info *info)
 	status = 0;
 	if (pthread_mutex_destroy(&info->block_message)
 		|| pthread_mutex_destroy(&info->block_data)
-		|| pthread_mutex_destroy(&info->block_time)
-		|| pthread_mutex_destroy(&info->waiter))
+		|| pthread_mutex_destroy(&info->block_time))
 	{
 		write(2, PTH_M_DESTROY, 40);
 		status = 1;

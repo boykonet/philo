@@ -6,7 +6,7 @@
 /*   By: gkarina <gkarina@student.21-school.ru>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/23 00:26:42 by gkarina           #+#    #+#             */
-/*   Updated: 2021/04/27 20:38:34 by gkarina          ###   ########.fr       */
+/*   Updated: 2021/05/03 18:29:42 by gkarina          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,7 @@ int	philo_eat(t_philo *ph)
 	sem_post(ph->info->forks);
 	if (ph->ate == ph->info->numb_must_eat)
 	{
-		/* sem_wait(ph->info->block_data); */
 		ph->info->must_eat++;
-		/* sem_post(ph->info->block_data); */
 		return (2);
 	}
 	return (0);
@@ -41,26 +39,17 @@ int	philo_eat(t_philo *ph)
 
 void	*routine(void *ph)
 {
-	pthread_detach(((t_philo *)ph)->philo);
-	while (!((t_philo *)ph)->info->died
-		&& !((t_philo *)ph)->info->philos_eat)
+	while (TRUE)
 	{
-		if (!((t_philo *)ph)->info->died)
-		{
-			if (philo_eat(ph) == 2)
-				break ;
-		}
-		if (!((t_philo *)ph)->info->died && !((t_philo *)ph)->info->philos_eat)
-		{
-			message(ph, lifetime(((t_philo *)ph)->info->block_time,
-					&((t_philo *)ph)->info->start_time,
-					&((t_philo *)ph)->info->curr_time, 0), PH_SLEEP, NULL);
-			myusleep(((t_philo *)ph)->info->time_to_sleep * 1000);
-		}
-		if (!((t_philo *)ph)->info->died && !((t_philo *)ph)->info->philos_eat)
-			message(ph, lifetime(((t_philo *)ph)->info->block_time,
-					&((t_philo *)ph)->info->start_time,
-					&((t_philo *)ph)->info->curr_time, 0), PH_THINK, NULL);
+		if (philo_eat(ph) == 2)
+			break ;
+		message(ph, lifetime(((t_philo *)ph)->info->block_time,
+				&((t_philo *)ph)->info->start_time,
+				&((t_philo *)ph)->info->curr_time, 0), PH_SLEEP, NULL);
+		myusleep(((t_philo *)ph)->info->time_to_sleep * 1000);
+		message(ph, lifetime(((t_philo *)ph)->info->block_time,
+				&((t_philo *)ph)->info->start_time,
+				&((t_philo *)ph)->info->curr_time, 0), PH_THINK, NULL);
 	}
 	return (NULL);
 }
@@ -87,7 +76,7 @@ int	main(int argc, char **argv)
 {
 	t_info	info;
 	t_philo	*ph;
-	int 	status;
+	int		status;
 
 	status = 0;
 	if (argc != 5 && argc != 6)
@@ -101,10 +90,6 @@ int	main(int argc, char **argv)
 		init_philos(ph, &info);
 	if (!status && create_process_treads(ph, &info))
 		status = 1;
-	// if (!status)
-	// 	check_die(philo, &info);
-	// if (!status && join_philo(philo, info.numb_of_philo))
-	// 	status = 1;
 	destroy_info(&info);
 	free(ph);
 	return (status);
